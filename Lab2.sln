@@ -1,25 +1,340 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36429.23 d17.14
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lab2", "Lab2\Lab2.csproj", "{12443430-534D-477F-AD44-49291193B098}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{12443430-534D-477F-AD44-49291193B098}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12443430-534D-477F-AD44-49291193B098}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12443430-534D-477F-AD44-49291193B098}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12443430-534D-477F-AD44-49291193B098}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {76EC3287-9AB8-4627-85A0-C9470A19DDBE}
-	EndGlobalSection
-EndGlobal
+﻿using System;
+using System.Collections.Generic;
+
+namespace AllTasks
+{
+    // 1. Человек (задача 1.2)
+    public class Person
+    {
+        public string Name { get; set; }
+        public int Height { get; set; }
+
+        public Person(string name, int height)
+        {
+            Name = name;
+            Height = height;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}, рост: {Height}";
+        }
+    }
+
+    // 2. Имена (задача 1.3)
+    public class FullName
+    {
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+
+        public FullName(string lastName, string firstName = null, string middleName = null)
+        {
+            LastName = lastName;
+            FirstName = firstName;
+            MiddleName = middleName;
+        }
+
+        public override string ToString()
+        {
+            List<string> parts = new List<string>();
+
+            if (!string.IsNullOrEmpty(LastName))
+                parts.Add(LastName);
+            if (!string.IsNullOrEmpty(FirstName))
+                parts.Add(FirstName);
+            if (!string.IsNullOrEmpty(MiddleName))
+                parts.Add(MiddleName);
+
+            return string.Join(" ", parts);
+        }
+    }
+
+    // 3. Человек с именем (задача 1.4)
+    public class PersonWithName
+    {
+        public FullName Name { get; set; }
+        public int Height { get; set; }
+
+        public PersonWithName(FullName name, int height)
+        {
+            Name = name;
+            Height = height;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}, рост: {Height}";
+        }
+    }
+
+    // 4-5. Города (задачи 3.3 и 3.4)
+    public class City
+    {
+        public string Name { get; set; }
+        public Dictionary<string, int> ConnectedCities { get; set; }
+
+        public City(string name)
+        {
+            Name = name;
+            ConnectedCities = new Dictionary<string, int>();
+        }
+
+        public City(string name, Dictionary<string, int> connectedCities)
+        {
+            Name = name;
+            ConnectedCities = connectedCities ?? new Dictionary<string, int>();
+        }
+
+        public void AddConnection(string cityName, int cost)
+        {
+            if (!ConnectedCities.ContainsKey(cityName))
+            {
+                ConnectedCities.Add(cityName, cost);
+            }
+        }
+
+        public override string ToString()
+        {
+            if (ConnectedCities.Count == 0)
+                return $"{Name} (нет связей)";
+
+            string result = $"{Name} связан с:";
+            foreach (var connection in ConnectedCities)
+            {
+                result += $"\n  {connection.Key}: стоимость {connection.Value}";
+            }
+            return result;
+        }
+    }
+
+    // 6. Дроби (задача 1.6)
+    public class Fraction
+    {
+        public int Numerator { get; private set; }
+        public int Denominator { get; private set; }
+
+        public Fraction(int numerator, int denominator)
+        {
+            if (denominator == 0)
+                throw new ArgumentException("Знаменатель не может быть равен 0");
+
+            Numerator = numerator;
+            Denominator = denominator;
+            Simplify();
+        }
+
+        private void Simplify()
+        {
+            int gcd = GCD(Math.Abs(Numerator), Math.Abs(Denominator));
+            Numerator /= gcd;
+            Denominator /= gcd;
+
+            if (Denominator < 0)
+            {
+                Numerator = -Numerator;
+                Denominator = -Denominator;
+            }
+        }
+
+        private int GCD(int a, int b)
+        {
+            while (b != 0)
+            {
+                int temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
+        }
+
+        public Fraction Sum(Fraction other)
+        {
+            int newNumerator = Numerator * other.Denominator + other.Numerator * Denominator;
+            int newDenominator = Denominator * other.Denominator;
+            return new Fraction(newNumerator, newDenominator);
+        }
+
+        public Fraction Sum(int number)
+        {
+            return Sum(new Fraction(number, 1));
+        }
+
+        public Fraction Minus(Fraction other)
+        {
+            int newNumerator = Numerator * other.Denominator - other.Numerator * Denominator;
+            int newDenominator = Denominator * other.Denominator;
+            return new Fraction(newNumerator, newDenominator);
+        }
+
+        public Fraction Minus(int number)
+        {
+            return Minus(new Fraction(number, 1));
+        }
+
+        public Fraction Multiply(Fraction other)
+        {
+            return new Fraction(Numerator * other.Numerator, Denominator * other.Denominator);
+        }
+
+        public Fraction Multiply(int number)
+        {
+            return Multiply(new Fraction(number, 1));
+        }
+
+        public Fraction Div(Fraction other)
+        {
+            if (other.Numerator == 0)
+                throw new DivideByZeroException("Деление на ноль невозможно");
+
+            return new Fraction(Numerator * other.Denominator, Denominator * other.Numerator);
+        }
+
+        public Fraction Div(int number)
+        {
+            return Div(new Fraction(number, 1));
+        }
+
+        public override string ToString()
+        {
+            return $"{Numerator}/{Denominator}";
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            // Задание 1
+            Console.WriteLine("1. ЧЕЛОВЕК");
+            Console.WriteLine("===========");
+            Person cleopatra = new Person("Клеопатра", 152);
+            Person pushkin = new Person("Пушкин", 167);
+            Person vladimir = new Person("Владимир", 189);
+
+            Console.WriteLine("Созданы люди:");
+            Console.WriteLine($"1. {cleopatra}");
+            Console.WriteLine($"2. {pushkin}");
+            Console.WriteLine($"3. {vladimir}");
+            Console.WriteLine();
+
+            // Задание 2
+            Console.WriteLine("2. ИМЕНА");
+            Console.WriteLine("=========");
+            FullName name1 = new FullName("Клеопатра");
+            FullName name2 = new FullName("Пушкин", "Александр", "Сергеевич");
+            FullName name3 = new FullName("Маяковский", "Владимир");
+
+            Console.WriteLine("Созданы имена:");
+            Console.WriteLine($"1. {name1}");
+            Console.WriteLine($"2. {name2}");
+            Console.WriteLine($"3. {name3}");
+            Console.WriteLine();
+
+            // Задание 3
+            Console.WriteLine("3. ЧЕЛОВЕК С ИМЕНЕМ");
+            Console.WriteLine("===================");
+            PersonWithName person1 = new PersonWithName(name1, 152);
+            PersonWithName person2 = new PersonWithName(name2, 167);
+            PersonWithName person3 = new PersonWithName(name3, 189);
+
+            Console.WriteLine("Созданы люди с именами:");
+            Console.WriteLine($"1. {person1}");
+            Console.WriteLine($"2. {person2}");
+            Console.WriteLine($"3. {person3}");
+            Console.WriteLine();
+
+            // Задания 4-5
+            Console.WriteLine("4-5. ГОРОДА");
+            Console.WriteLine("============");
+
+            // Создаем города
+            City moscow = new City("Москва");
+            City spb = new City("Санкт-Петербург");
+            City kazan = new City("Казань");
+            City ekb = new City("Екатеринбург");
+
+            // Добавляем связи
+            moscow.AddConnection("Санкт-Петербург", 700);
+            moscow.AddConnection("Казань", 800);
+            spb.AddConnection("Москва", 700);
+            spb.AddConnection("Казань", 1200);
+            kazan.AddConnection("Москва", 800);
+            kazan.AddConnection("Санкт-Петербург", 1200);
+            kazan.AddConnection("Екатеринбург", 900);
+            ekb.AddConnection("Казань", 900);
+
+            Console.WriteLine("Созданы города со связями:");
+            Console.WriteLine(moscow);
+            Console.WriteLine();
+            Console.WriteLine(spb);
+            Console.WriteLine();
+            Console.WriteLine(kazan);
+            Console.WriteLine();
+            Console.WriteLine(ekb);
+            Console.WriteLine();
+
+            // Демонстрация второго конструктора
+            Console.WriteLine("Пример создания города через второй конструктор:");
+            var connections = new Dictionary<string, int>
+            {
+                {"Новосибирск", 2500},
+                {"Омск", 1800}
+            };
+            City omsk = new City("Омск", connections);
+            Console.WriteLine(omsk);
+            Console.WriteLine();
+
+            // Задание 6
+            Console.WriteLine("6. ДРОБИ");
+            Console.WriteLine("=========");
+
+            // Создаем дроби
+            Fraction f1 = new Fraction(1, 3);
+            Fraction f2 = new Fraction(2, 3);
+            Fraction f3 = new Fraction(3, 4);
+            Fraction f4 = new Fraction(5, 6);
+
+            Console.WriteLine("Созданы дроби:");
+            Console.WriteLine($"f1 = {f1}");
+            Console.WriteLine($"f2 = {f2}");
+            Console.WriteLine($"f3 = {f3}");
+            Console.WriteLine($"f4 = {f4}");
+            Console.WriteLine();
+
+            Console.WriteLine("Примеры операций:");
+            Console.WriteLine($"{f1} + {f2} = {f1.Sum(f2)}");
+            Console.WriteLine($"{f3} - {f4} = {f3.Minus(f4)}");
+            Console.WriteLine($"{f1} * {f2} = {f1.Multiply(f2)}");
+            Console.WriteLine($"{f3} / {f4} = {f3.Div(f4)}");
+            Console.WriteLine();
+
+            Console.WriteLine("Операции с целыми числами:");
+            Console.WriteLine($"{f1} + 2 = {f1.Sum(2)}");
+            Console.WriteLine($"{f3} - 1 = {f3.Minus(1)}");
+            Console.WriteLine($"{f2} * 3 = {f2.Multiply(3)}");
+            Console.WriteLine($"{f4} / 2 = {f4.Div(2)}");
+            Console.WriteLine();
+
+            // Вычисление цепочки операций
+            Console.WriteLine("Вычисление выражения f1.Sum(f2).Div(f3).Minus(5):");
+            Console.WriteLine($"f1 = {f1}, f2 = {f2}, f3 = {f3}");
+
+            try
+            {
+                Fraction result = f1.Sum(f2).Div(f3).Minus(5);
+                Console.WriteLine($"Результат: {result}");
+
+                // Покажем по шагам
+                Console.WriteLine("\nПошагово:");
+                Console.WriteLine($"1. f1.Sum(f2) = {f1.Sum(f2)}");
+                Console.WriteLine($"2. ...Div(f3) = {f1.Sum(f2).Div(f3)}");
+                Console.WriteLine($"3. ...Minus(5) = {result}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка: {ex.Message}");
+            }
+        }
+    }
+}
